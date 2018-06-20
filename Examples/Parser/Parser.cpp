@@ -152,7 +152,6 @@ namespace Examples
     NativeJIT::Node<float>& Parser::ParseSum()
     {
         auto& left = ParseProduct();
-
         SkipWhite();
         if (PeekChar() == '+')
         {
@@ -164,9 +163,16 @@ namespace Examples
         else if (PeekChar() == '-')
         {
             GetChar();
-            auto& right = ParseSum();
+            auto& right = ParseProduct();
 
-            return m_expression.Sub(left, right);
+            auto& difference = m_expression.Sub(left, right);
+
+            if (PeekChar() == '+' || PeekChar() == '-') {
+                auto& rest = ParseSum();
+                return m_expression.Add(difference, rest);
+            } else {
+                return difference;
+            }
         }
         else
         {
@@ -501,6 +507,7 @@ bool Test()
 
         // Subtraction
         TestCase("4-5", -1.0),
+        TestCase("1-1-1-1", -2.0),
 
         // Multiplication
         TestCase("2*3", 6.0),
